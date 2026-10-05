@@ -1,0 +1,30 @@
+# Сборка
+build/
+*.o
+*.obj
+*.a
+*.so
+*.exe
+*.dll
+
+# Qt
+*.user
+*.pro.user
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+*.autosave
+compile_commands.json
+
+# База данных
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# Временное
+*.log
+*.tmp

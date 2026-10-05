@@ -1,0 +1,678 @@
+/* ============================================================
+   LocalLLM-GUI — СВЕТЛАЯ ТЕМА
+   ============================================================ */
+
+QMainWindow, QWidget {
+    font-family: "Inter", "Segoe UI", "SF Pro Display", sans-serif;
+    font-size: 14px;
+    color: #1c1d2b;
+}
+
+QMainWindow {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #e8f0fe,
+        stop:0.5 #f0eaf8,
+        stop:1 #e6f5f0);
+}
+
+/* ============================================================
+   ОБЩИЕ КОМПОНЕНТЫ
+   ============================================================ */
+
+QListWidget {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 14px;
+    padding: 6px;
+    outline: none;
+}
+
+QListWidget::item {
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: #1c1d2b;
+}
+
+QListWidget::item:hover {
+    background: rgba(123, 168, 255, 0.14);
+}
+
+QListWidget::item:selected {
+    background: rgba(123, 168, 255, 0.28);
+    color: #1c1d2b;
+}
+
+QPushButton {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 13px;
+    padding: 10px 16px;
+    color: #1c1d2b;
+    font-weight: 600;
+}
+
+QPushButton:hover {
+    background: rgba(123, 168, 255, 0.14);
+    border-color: rgba(123, 168, 255, 0.4);
+}
+
+QPushButton:pressed {
+    background: rgba(123, 168, 255, 0.22);
+}
+
+QPushButton#sendButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #8db6ff, stop:1 #6a97f2);
+    color: #ffffff;
+    border: none;
+    border-radius: 13px;
+    padding: 10px 20px;
+    font-weight: 700;
+}
+
+QPushButton#sendButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #9cc2ff, stop:1 #7ba8ff);
+}
+
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: #1c1d2b;
+    selection-background-color: rgba(123, 168, 255, 0.35);
+}
+
+QLineEdit:hover, QTextEdit:hover {
+    background: rgba(255, 255, 255, 0.78);
+}
+
+QLineEdit:focus, QTextEdit:focus {
+    border: 1px solid rgba(123, 168, 255, 0.6);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+QTextEdit#chatView {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(60, 70, 110, 0.08);
+    border-radius: 18px;
+    padding: 14px;
+    font-size: 14.5px;
+}
+
+QComboBox {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 12px;
+    padding: 8px 12px;
+    color: #1c1d2b;
+    min-height: 24px;
+}
+
+QComboBox:hover {
+    border-color: rgba(123, 168, 255, 0.5);
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+}
+
+QComboBox QAbstractItemView {
+    background: #ffffff;
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 10px;
+    selection-background-color: rgba(123, 168, 255, 0.28);
+    padding: 4px;
+}
+
+/* Ползунки */
+QSlider {
+    min-height: 24px;
+}
+
+QSlider::groove:horizontal {
+    height: 6px;
+    background: rgba(60, 70, 110, 0.14);
+    border-radius: 3px;
+}
+
+QSlider::sub-page:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #8db6ff, stop:1 #6a97f2);
+    border-radius: 3px;
+    height: 6px;
+}
+
+QSlider::add-page:horizontal {
+    background: rgba(60, 70, 110, 0.14);
+    border-radius: 3px;
+    height: 6px;
+}
+
+QSlider::handle:horizontal {
+    background: #ffffff;
+    border: 2px solid #6a97f2;
+    width: 18px;
+    height: 18px;
+    margin: -8px 0;
+    border-radius: 9px;
+}
+
+QSlider::handle:horizontal:hover {
+    border: 2px solid #4a7ad4;
+    background: #f8fbff;
+}
+
+QSpinBox {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 12px;
+    padding: 8px 12px;
+    color: #1c1d2b;
+}
+
+QGroupBox {
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 14px;
+    margin-top: 14px;
+    padding-top: 12px;
+    font-weight: 600;
+    color: #1c1d2b;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+    color: #62657a;
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+QLabel {
+    color: #1c1d2b;
+    background: transparent;
+}
+
+QStatusBar {
+    background: rgba(255, 255, 255, 0.55);
+    color: #62657a;
+    border-top: 1px solid rgba(60, 70, 110, 0.08);
+    padding: 4px 12px;
+}
+
+/* Скроллбары */
+QScrollBar:vertical {
+    background: transparent;
+    width: 8px;
+    margin: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(120, 125, 150, 0.35);
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(120, 125, 150, 0.55);
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0; border: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 0px;
+    margin: 0px;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0; border: none; height: 0;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: transparent;
+}
+
+QToolTip {
+    background: #1c1d2b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+}
+
+/* ============================================================
+   ЛЕВАЯ ПАНЕЛЬ
+   ============================================================ */
+
+QWidget#dialogListWidget {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 24px;
+}
+
+QPushButton#newDialogButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #8db6ff, stop:1 #6a97f2);
+    color: #ffffff;
+    border: none;
+    border-radius: 22px;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+QPushButton#newDialogButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #9cc2ff, stop:1 #7ba8ff);
+}
+
+QLineEdit#searchField {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(60, 70, 110, 0.08);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #62657a;
+}
+
+QLineEdit#searchField:focus {
+    border: 1px solid rgba(123, 168, 255, 0.6);
+    background: rgba(255, 255, 255, 0.85);
+    color: #1c1d2b;
+}
+
+QLabel#groupHeader {
+    color: #a0a2b4;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 8px 6px 2px 6px;
+}
+
+QListWidget#dialogsList {
+    background: transparent;
+    border: none;
+    padding: 0;
+    outline: none;
+}
+
+QListWidget#dialogsList::item {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    padding: 0;
+}
+
+QListWidget#dialogsList::item:hover {
+    background: rgba(123, 168, 255, 0.14);
+}
+
+QListWidget#dialogsList::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 rgba(123, 168, 255, 0.28),
+                                stop:1 rgba(200, 182, 255, 0.22));
+    border: 1px solid rgba(123, 168, 255, 0.4);
+}
+
+QWidget#dialogCard {
+    background: transparent;
+}
+
+QLabel#dialogTitle {
+    color: #1c1d2b;
+    font-size: 13.5px;
+    font-weight: 700;
+    background: transparent;
+}
+
+QLabel#dialogTime {
+    color: #a0a2b4;
+    font-size: 11.5px;
+    background: transparent;
+}
+
+QLabel#dialogPreview {
+    color: #62657a;
+    font-size: 12px;
+    background: transparent;
+}
+
+QFrame#footerSeparator {
+    background: rgba(60, 70, 110, 0.1);
+    max-height: 1px;
+    border: none;
+}
+
+QWidget#profileFooter {
+    background: transparent;
+}
+
+QLabel#avatar {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #ffb6c1, stop:1 #c8b6ff);
+    color: #ffffff;
+    border-radius: 18px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+QLabel#userName {
+    color: #1c1d2b;
+    font-size: 13.5px;
+    font-weight: 700;
+    background: transparent;
+}
+
+QLabel#userStatus {
+    color: #a0a2b4;
+    font-size: 11.5px;
+    background: transparent;
+}
+
+QPushButton#iconButton {
+    background: transparent;
+    border: none;
+    color: #62657a;
+    font-size: 16px;
+    border-radius: 10px;
+    padding: 0;
+}
+
+QPushButton#iconButton:hover {
+    background: rgba(123, 168, 255, 0.14);
+    color: #3f6fd4;
+}
+
+/* ============================================================
+   ЦЕНТР — ТУЛБАР
+   ============================================================ */
+
+QWidget#chatToolbar {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 14px;
+}
+
+QLabel#chatTitle {
+    color: #1c1d2b;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+QLabel#chatStatus {
+    color: #a0a2b4;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+QFrame#toolbarSeparator {
+    background: rgba(60, 70, 110, 0.08);
+    max-height: 1px;
+    border: none;
+}
+
+/* ============================================================
+   ПРАВАЯ ПАНЕЛЬ
+   ============================================================ */
+
+QWidget#settingsPanel {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 24px;
+}
+
+QScrollArea#settingsScroll {
+    background: transparent;
+    border: none;
+}
+
+QWidget#settingsContent {
+    background: transparent;
+}
+
+QLabel#settingsLabel {
+    color: #62657a;
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+QLabel#settingsSectionTitle {
+    color: #a0a2b4;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding-top: 6px;
+}
+
+QLabel#modelMeta {
+    color: #a0a2b4;
+    font-size: 11.5px;
+    padding-top: 2px;
+    padding-left: 2px;
+}
+
+QLabel#paramLabel {
+    color: #1c1d2b;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+QLabel#paramValue {
+    color: #3f6fd4;
+    font-size: 12.5px;
+    font-weight: 700;
+    background: rgba(123, 168, 255, 0.2);
+    border-radius: 9px;
+    padding: 3px 10px;
+}
+
+QLabel#paramHint {
+    color: #a0a2b4;
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+QComboBox#modelSelector {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(60, 70, 110, 0.14);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: #1c1d2b;
+    font-size: 14px;
+    font-weight: 600;
+    min-height: 22px;
+}
+
+QComboBox#modelSelector:hover {
+    border-color: rgba(123, 168, 255, 0.6);
+}
+
+QComboBox#modelSelector::drop-down {
+    border: none;
+    width: 28px;
+}
+
+QComboBox#modelSelector::down-arrow {
+    image: none;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #62657a;
+    width: 0;
+    height: 0;
+    margin-right: 10px;
+}
+
+QPlainTextEdit#systemPrompt {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: #1c1d2b;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+QPlainTextEdit#systemPrompt:focus {
+    border: 1px solid rgba(123, 168, 255, 0.65);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+QPushButton#primaryButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #8db6ff, stop:1 #6a97f2);
+    color: #ffffff;
+    border: none;
+    border-radius: 13px;
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 13.5px;
+}
+
+QPushButton#primaryButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #9cc2ff, stop:1 #7ba8ff);
+}
+
+QPushButton#secondaryButton {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(60, 70, 110, 0.16);
+    border-radius: 13px;
+    padding: 9px 14px;
+    color: #1c1d2b;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+QPushButton#secondaryButton:hover {
+    background: rgba(123, 168, 255, 0.16);
+    border-color: rgba(123, 168, 255, 0.45);
+}
+
+QWidget#streamingRow {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(60, 70, 110, 0.1);
+    border-radius: 14px;
+}
+
+QFrame#modelInfoCard {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 14px;
+}
+
+QLabel#modelInfoName {
+    color: #1c1d2b;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+QLabel#modelInfoStatus {
+    color: #3fbf8a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+QFrame#modelInfoStat {
+    background: rgba(123, 168, 255, 0.16);
+    border: none;
+    border-radius: 10px;
+}
+
+QLabel#modelInfoStatTitle {
+    color: #62657a;
+    font-size: 11px;
+}
+
+QLabel#modelInfoStatValue {
+    color: #1c1d2b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ============================================================
+   ДИАЛОГ НАСТРОЕК
+   ============================================================ */
+
+QDialog#settingsDialog {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #e8f0fe,
+        stop:0.5 #f0eaf8,
+        stop:1 #e6f5f0);
+}
+
+QLabel#dialogTitle {
+    font-size: 18px;
+    font-weight: 700;
+    padding-bottom: 8px;
+    color: #1c1d2b;
+}
+
+QTabWidget#settingsTabs::pane {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 14px;
+    padding: 8px;
+    top: -1px;
+}
+
+QTabWidget#settingsTabs QTabBar::tab {
+    background: transparent;
+    color: #62657a;
+    padding: 8px 16px;
+    border-radius: 10px;
+    margin-right: 4px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+QTabWidget#settingsTabs QTabBar::tab:selected {
+    background: rgba(123, 168, 255, 0.24);
+    color: #3f6fd4;
+}
+
+QTabWidget#settingsTabs QTabBar::tab:hover:!selected {
+    background: rgba(123, 168, 255, 0.12);
+}
+QPushButton#attachButton {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(60, 70, 110, 0.12);
+    border-radius: 10px;
+    font-size: 16px;
+    padding: 0;
+    color: #3f6fd4;
+}
+
+QPushButton#attachButton:hover {
+    background: rgba(123, 168, 255, 0.2);
+    border-color: rgba(123, 168, 255, 0.5);
+}
+
+QPushButton#fileChip {
+    background: rgba(123, 168, 255, 0.18);
+    border: 1px solid rgba(123, 168, 255, 0.4);
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #3f6fd4;
+}
+
+QPushButton#fileChip:hover {
+    background: rgba(123, 168, 255, 0.3);
+}
+
+QWidget#chipsRow {
+    background: transparent;
+}
