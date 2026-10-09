@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QScrollArea>
+#include "../config/settings_manager.h"
 
 SettingsPanel::SettingsPanel(QWidget *parent)
     : QWidget(parent)
@@ -37,7 +38,33 @@ SettingsPanel::SettingsPanel(QWidget *parent)
     QVBoxLayout *outer = new QVBoxLayout(this);
     outer->setContentsMargins(0, 0, 0, 0);
     outer->addWidget(scroll);
+
+    // Восстанавливаем сохранённую модель
+    QString savedModel = SettingsManager::instance().value("model");
+    if (!savedModel.isEmpty()) {
+        m_modelSelector->addItem(savedModel);
+        m_modelSelector->setCurrentText(savedModel);
+    }
+
+    connect(m_modelSelector, &QComboBox::currentTextChanged,
+            this, [](const QString &text){
+        SettingsManager::instance().setValue("model", text);
+    });
 }
+
+static const QString DEFAULT_PROMPT =
+    "Ты — полезный ассистент внутри приложения LocalLLM-GUI.\n"
+    "\n"
+    "Правила:\n"
+    "1. Отвечай на русском языке.\n"
+    "2. Отвечай кратко и по делу, без воды.\n"
+    "3. НЕ выдумывай API, ссылки, названия библиотек, факты.\n"
+    "4. Если не знаешь ответ — скажи честно «не знаю».\n"
+    "5. Ты НЕ умеешь: работать в интернете, выполнять код, "
+    "подключаться к базам данных, обучаться в реальном времени.\n"
+    "6. Код оформляй в блоках ```язык ... ```.\n"
+    "7. Форматируй ответ: используй **жирный** для ключевых слов, "
+    "списки через дефис, заголовки через ##.";
 
 void SettingsPanel::setupModelSection(QVBoxLayout *layout)
 {
@@ -63,11 +90,10 @@ void SettingsPanel::setupParamsSection(QVBoxLayout *layout)
     sectionTitle->setObjectName("settingsSectionTitle");
     layout->addWidget(sectionTitle);
 
-    // === Temperature ===
     addSliderParam(layout,
         "Креативность ответов",
-        "Ниже — точнее и строже, выше — свободнее и неожиданнее",
-        0, 200, 1, 70, "0.70",
+        "Ниже — точнее и строже, выше — свободнее. Для точности — 0.3",
+        0, 200, 1, 30, "0.30",
         &m_temperatureSlider, &m_temperatureValue);
 
     connect(m_temperatureSlider, &QSlider::valueChanged, this, [this](int v){
@@ -75,11 +101,10 @@ void SettingsPanel::setupParamsSection(QVBoxLayout *layout)
         emit temperatureChanged(v / 100.0);
     });
 
-    // === Top-p ===
     addSliderParam(layout,
         "Разнообразие слов",
-        "Чем выше, тем богаче и разнообразнее формулировки",
-        0, 100, 1, 90, "0.90",
+        "Чем выше, тем богаче формулировки",
+        0, 100, 1, 70, "0.70",
         &m_topPSlider, &m_topPValue);
 
     connect(m_topPSlider, &QSlider::valueChanged, this, [this](int v){
@@ -87,22 +112,20 @@ void SettingsPanel::setupParamsSection(QVBoxLayout *layout)
         emit topPChanged(v / 100.0);
     });
 
-    // === Context ===
     addSliderParam(layout,
         "Память диалога",
         "Сколько переписки модель помнит (в токенах)",
-        512, 32768, 512, 8192, "8192",
+        512, 32768, 512, 4096, "4096",
         &m_ctxSlider, &m_ctxValue);
 
     connect(m_ctxSlider, &QSlider::valueChanged, this, [this](int v){
         m_ctxValue->setText(QString::number(v));
     });
 
-    // === Max tokens ===
     addSliderParam(layout,
         "Максимальная длина ответа",
         "Ответ не будет длиннее этого значения (в токенах)",
-        64, 8192, 64, 2048, "2048",
+        64, 8192, 64, 1024, "1024",
         &m_maxTokensSlider, &m_maxTokensValue);
 
     connect(m_maxTokensSlider, &QSlider::valueChanged, this, [this](int v){
@@ -167,15 +190,15 @@ void SettingsPanel::setupSystemPromptSection(QVBoxLayout *layout)
     sectionTitle->setObjectName("settingsSectionTitle");
     layout->addWidget(sectionTitle);
 
-    QLabel *hint = new QLabel("Опишите, как модель должна себя вести: роль, тон, язык ответов.", this);
+    QLabel *hint = new QLabel("Опишите, как модель должна себя вести: роль, тон, язык.", this);
     hint->setObjectName("paramHint");
     hint->setWordWrap(true);
     layout->addWidget(hint);
 
     m_systemPrompt = new QPlainTextEdit(this);
     m_systemPrompt->setObjectName("systemPrompt");
-    m_systemPrompt->setPlainText("Ты — полезный ассистент. Отвечай кратко, по делу и на русском языке. Код оформляй в блоках.");
-    m_systemPrompt->setMinimumHeight(100);
+    m_systemPrompt->setPlainText(DEFAULT_PROMPT);
+    m_systemPrompt->setMinimumHeight(140);
     layout->addWidget(m_systemPrompt);
 
     QPushButton *saveBtn = new QPushButton("Сохранить инструкцию как шаблон", this);
@@ -280,21 +303,17 @@ void SettingsPanel::setupFooterButtons(QVBoxLayout *layout)
     resetBtn->setMinimumWidth(100);
 
     connect(resetBtn, &QPushButton::clicked, this, [this](){
-        m_temperatureSlider->setValue(70);
-        m_topPSlider->setValue(90);
-        m_ctxSlider->setValue(8192);
-        m_maxTokensSlider->setValue(2048);
-        m_systemPrompt->setPlainText("Ты — полезный ассистент. Отвечай кратко, по делу и на русском языке. Код оформляй в блоках.");
+        m_temperatureSlider->setValue(30);
+        m_topPSlider->setValue(70);
+        m_ctxSlider->setValue(4096);
+        m_maxTokensSlider->setValue(1024);
+        m_systemPrompt->setPlainText(DEFAULT_PROMPT);
     });
 
     row->addWidget(saveBtn, 1);
     row->addWidget(resetBtn);
     layout->addLayout(row);
 }
-
-// ============================================================
-// Геттеры для MainWindow
-// ============================================================
 
 QString SettingsPanel::currentModel() const
 {
@@ -339,4 +358,11 @@ void SettingsPanel::setAvailableModels(const QStringList &models)
 
     int idx = m_modelSelector->findText(current);
     if (idx >= 0) m_modelSelector->setCurrentIndex(idx);
+}
+
+void SettingsPanel::applySystemPrompt(const QString &text)
+{
+    if (m_systemPrompt) {
+        m_systemPrompt->setPlainText(text);
+    }
 }

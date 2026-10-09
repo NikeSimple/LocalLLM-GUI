@@ -64,11 +64,10 @@ void ApiClient::generateTitle(const QString &model, const QString &userText)
 
     QJsonObject sys;
     sys["role"] = "system";
-       sys["content"] =
-        "Ты — генератор коротких названий диалогов. "
-        "По сообщению пользователя придумай название РОВНО из 2 слов на русском языке. "
-        "Не больше двух слов, не меньше двух слов. "
-        "Пиши только эти 2 слова, без кавычек, без точки, без пояснений.";
+    sys["content"] =
+        "Ты — генератор названий диалогов. По сообщению пользователя "
+        "придумай название РОВНО из 2 слов на русском языке. "
+        "Не больше и не меньше. Без кавычек, без точки, без пояснений.";
     messages.append(sys);
 
     QJsonObject user;
@@ -90,15 +89,12 @@ void ApiClient::generateTitle(const QString &model, const QString &userText)
 
     connect(reply, &QNetworkReply::finished, this, [this, reply](){
         reply->deleteLater();
-
         if (reply->error() != QNetworkReply::NoError) {
             emit titleGenerated(QString());
             return;
         }
-
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         QJsonObject obj = doc.object();
-
         QString title = obj.value("message").toObject()
                            .value("content").toString().trimmed();
 

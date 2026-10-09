@@ -21,6 +21,12 @@ public:
     void updateDialogTitle(int index, const QString &newTitle);
     void updateDialogPreview(int index, const QString &preview);
     void createNewDialog();
+    void addDialogCardStatic(const QString &title,
+                             const QString &preview,
+                             const QString &time);
+
+    void setUserName(const QString &name);
+    void clearAllDialogs();
 
 signals:
     void newDialogRequested();

@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QTime>
+#include <QIcon>
 
 DialogListWidget::DialogListWidget(QWidget *parent)
     : QWidget(parent)
@@ -29,8 +30,10 @@ DialogListWidget::DialogListWidget(QWidget *parent)
 
 void DialogListWidget::setupNewDialogButton(QVBoxLayout *layout)
 {
-    m_newDialogButton = new QPushButton("+   Новый диалог", this);
+    m_newDialogButton = new QPushButton("Новый диалог", this);
     m_newDialogButton->setObjectName("newDialogButton");
+    m_newDialogButton->setIcon(QIcon(":/icons/plus.svg"));
+    m_newDialogButton->setIconSize(QSize(18, 18));
     m_newDialogButton->setCursor(Qt::PointingHandCursor);
     m_newDialogButton->setMinimumHeight(44);
     connect(m_newDialogButton, &QPushButton::clicked,
@@ -45,6 +48,8 @@ void DialogListWidget::setupSearch(QVBoxLayout *layout)
     m_searchField->setPlaceholderText("Поиск по диалогам");
     m_searchField->setMinimumHeight(38);
     m_searchField->setClearButtonEnabled(true);
+    m_searchField->addAction(QIcon(":/icons/search.svg"),
+                              QLineEdit::LeadingPosition);
     connect(m_searchField, &QLineEdit::textChanged,
             this, &DialogListWidget::onSearchChanged);
     layout->addWidget(m_searchField);
@@ -114,27 +119,29 @@ void DialogListWidget::addDialogCard(const QString &title,
     m_list->setItemWidget(item, card);
 }
 
+void DialogListWidget::addDialogCardStatic(const QString &title,
+                                            const QString &preview,
+                                            const QString &time)
+{
+    addDialogCard(title, preview, time);
+}
+
 void DialogListWidget::updateDialogTitle(int index, const QString &newTitle)
 {
     if (index < 0 || index >= m_list->count()) return;
-
     QListWidgetItem *item = m_list->item(index);
     QWidget *card = m_list->itemWidget(item);
     if (!card) return;
 
     QList<QLabel*> labels = card->findChildren<QLabel*>();
     for (QLabel *l : labels) {
-        if (l->objectName() == "dialogTitle") {
-            l->setText(newTitle);
-            break;
-        }
+        if (l->objectName() == "dialogTitle") { l->setText(newTitle); break; }
     }
 }
 
 void DialogListWidget::updateDialogPreview(int index, const QString &preview)
 {
     if (index < 0 || index >= m_list->count()) return;
-
     QListWidgetItem *item = m_list->item(index);
     QWidget *card = m_list->itemWidget(item);
     if (!card) return;
@@ -145,10 +152,7 @@ void DialogListWidget::updateDialogPreview(int index, const QString &preview)
 
     QList<QLabel*> labels = card->findChildren<QLabel*>();
     for (QLabel *l : labels) {
-        if (l->objectName() == "dialogPreview") {
-            l->setText(trimmed);
-            break;
-        }
+        if (l->objectName() == "dialogPreview") { l->setText(trimmed); break; }
     }
 }
 
@@ -178,19 +182,23 @@ void DialogListWidget::setupProfileFooter(QVBoxLayout *layout)
     userLayout->addWidget(m_userName);
     userLayout->addWidget(m_userStatus);
 
-    m_themeButton = new QPushButton("🌙", footer);
+    m_themeButton = new QPushButton(footer);
     m_themeButton->setObjectName("iconButton");
-    m_themeButton->setFixedSize(32, 32);
+    m_themeButton->setIcon(QIcon(":/icons/moon.svg"));
+    m_themeButton->setIconSize(QSize(20, 20));
+    m_themeButton->setFixedSize(36, 36);
     m_themeButton->setCursor(Qt::PointingHandCursor);
-    m_themeButton->setFlat(true);
+    m_themeButton->setToolTip("Переключить тему");
     connect(m_themeButton, &QPushButton::clicked,
             this, &DialogListWidget::themeToggleRequested);
 
-    m_settingsButton = new QPushButton("⚙", footer);
+    m_settingsButton = new QPushButton(footer);
     m_settingsButton->setObjectName("iconButton");
-    m_settingsButton->setFixedSize(32, 32);
+    m_settingsButton->setIcon(QIcon(":/icons/settings.svg"));
+    m_settingsButton->setIconSize(QSize(20, 20));
+    m_settingsButton->setFixedSize(36, 36);
     m_settingsButton->setCursor(Qt::PointingHandCursor);
-    m_settingsButton->setFlat(true);
+    m_settingsButton->setToolTip("Настройки");
     connect(m_settingsButton, &QPushButton::clicked,
             this, &DialogListWidget::settingsRequested);
 
@@ -202,24 +210,19 @@ void DialogListWidget::setupProfileFooter(QVBoxLayout *layout)
     layout->addWidget(footer);
 }
 
-int DialogListWidget::currentRow() const
+int DialogListWidget::currentRow() const { return m_list->currentRow(); }
+int DialogListWidget::count() const { return m_list->count(); }
+void DialogListWidget::setCurrentRow(int row) { m_list->setCurrentRow(row); }
+void DialogListWidget::createNewDialog() { onNewDialogClicked(); }
+
+void DialogListWidget::setUserName(const QString &name)
 {
-    return m_list->currentRow();
+    if (m_userName) m_userName->setText(name);
 }
 
-int DialogListWidget::count() const
+void DialogListWidget::clearAllDialogs()
 {
-    return m_list->count();
-}
-
-void DialogListWidget::setCurrentRow(int row)
-{
-    m_list->setCurrentRow(row);
-}
-
-void DialogListWidget::createNewDialog()
-{
-    onNewDialogClicked();
+    m_list->clear();
 }
 
 void DialogListWidget::onNewDialogClicked()

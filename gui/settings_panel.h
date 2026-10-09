@@ -18,7 +18,6 @@ class SettingsPanel : public QWidget
 public:
     explicit SettingsPanel(QWidget *parent = nullptr);
 
-    // Геттеры — используются MainWindow для формирования запроса к Ollama
     QString currentModel() const;
     double temperature() const;
     double topP() const;
@@ -27,8 +26,8 @@ public:
     QString systemPrompt() const;
     bool streamingEnabled() const;
 
-    // Сеттер — заполняет ComboBox реальными моделями из Ollama
     void setAvailableModels(const QStringList &models);
+    void applySystemPrompt(const QString &text);
 
 signals:
     void temperatureChanged(double value);

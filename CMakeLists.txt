@@ -7,7 +7,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network Sql)
+find_package(Qt6 REQUIRED COMPONENTS
+    Widgets
+    Network
+    Sql
+    Svg
+)
 
 set(SOURCES
     main.cpp
@@ -15,7 +20,7 @@ set(SOURCES
     gui/chat_widget.cpp
     gui/dialog_list_widget.cpp
     gui/settings_panel.cpp
-    gui/settings_dialog.cpp
+    gui/settings_overlay.cpp
     gui/model_selector_widget.cpp
     gui/connect_dialog.cpp
     gui/toggle_switch.cpp
@@ -32,6 +37,7 @@ set(SOURCES
     config/settings_manager.cpp
     config/logger.cpp
     resources/resources.qrc
+    resources/app.rc
 )
 
 add_executable(LocalLLM-GUI ${SOURCES})
@@ -44,8 +50,15 @@ target_link_libraries(LocalLLM-GUI PRIVATE
     Qt6::Widgets
     Qt6::Network
     Qt6::Sql
+    Qt6::Svg
 )
 
 enable_testing()
 add_executable(tests tests/test_main.cpp)
+
+find_library(SQLITE3_LIB NAMES sqlite3 PATHS /ucrt64/lib /usr/lib64 /usr/lib)
+if(SQLITE3_LIB)
+    target_link_libraries(tests PRIVATE ${SQLITE3_LIB})
+endif()
+
 add_test(NAME unit_tests COMMAND tests)
