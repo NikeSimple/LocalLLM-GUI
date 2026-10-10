@@ -3,6 +3,8 @@
 #include <QFrame>
 #include <QTime>
 #include <QIcon>
+#include <QMenu>
+#include <QAction>
 
 DialogListWidget::DialogListWidget(QWidget *parent)
     : QWidget(parent)
@@ -96,7 +98,7 @@ void DialogListWidget::addDialogCard(const QString &title,
 
     QHBoxLayout *topRow = new QHBoxLayout();
     topRow->setContentsMargins(0, 0, 0, 0);
-    topRow->setSpacing(8);
+    topRow->setSpacing(6);
 
     QLabel *titleLabel = new QLabel(title, card);
     titleLabel->setObjectName("dialogTitle");
@@ -106,8 +108,36 @@ void DialogListWidget::addDialogCard(const QString &title,
     timeLabel->setObjectName("dialogTime");
     timeLabel->setAlignment(Qt::AlignRight | Qt::AlignTop);
 
+    // === Кнопка «три точки» ===
+    QPushButton *menuButton = new QPushButton("⋮", card);
+    menuButton->setObjectName("dialogMenuButton");
+    menuButton->setCursor(Qt::PointingHandCursor);
+    menuButton->setFixedSize(22, 22);
+    menuButton->setFlat(true);
+    menuButton->setToolTip("Действия с диалогом");
+
+    connect(menuButton, &QPushButton::clicked, this, [this, card, menuButton](){
+        int row = rowFromCardWidget(card);
+        if (row < 0) return;
+
+        QMenu menu;
+        QAction *exportAction = menu.addAction("Экспортировать");
+        QAction *deleteAction = menu.addAction("Удалить");
+
+        QAction *chosen = menu.exec(menuButton->mapToGlobal(
+            QPoint(0, menuButton->height())));
+        if (!chosen) return;
+
+        if (chosen == exportAction) {
+            emit exportDialogRequested(row);
+        } else if (chosen == deleteAction) {
+            emit deleteDialogRequested(row);
+        }
+    });
+
     topRow->addWidget(titleLabel, 1);
     topRow->addWidget(timeLabel);
+    topRow->addWidget(menuButton);
 
     QLabel *previewLabel = new QLabel(preview, card);
     previewLabel->setObjectName("dialogPreview");
@@ -117,6 +147,14 @@ void DialogListWidget::addDialogCard(const QString &title,
     cardLayout->addWidget(previewLabel);
 
     m_list->setItemWidget(item, card);
+}
+
+int DialogListWidget::rowFromCardWidget(QWidget *cardWidget) const
+{
+    for (int i = 0; i < m_list->count(); ++i) {
+        if (m_list->itemWidget(m_list->item(i)) == cardWidget) return i;
+    }
+    return -1;
 }
 
 void DialogListWidget::addDialogCardStatic(const QString &title,
@@ -223,6 +261,13 @@ void DialogListWidget::setUserName(const QString &name)
 void DialogListWidget::clearAllDialogs()
 {
     m_list->clear();
+}
+
+void DialogListWidget::removeDialogRow(int row)
+{
+    if (row < 0 || row >= m_list->count()) return;
+    QListWidgetItem *item = m_list->takeItem(row);
+    delete item;
 }
 
 void DialogListWidget::onNewDialogClicked()

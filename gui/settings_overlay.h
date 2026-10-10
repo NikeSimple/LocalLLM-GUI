@@ -47,6 +47,8 @@ private:
     void onEditTemplateClicked();
     void onDeleteTemplateClicked();
     void onApplyTemplateClicked();
+    void onTemplateCheckChanged(int id, bool checked);
+    void collectAndEmitActivePrompts();
 
     QTabWidget *m_tabs = nullptr;
 

@@ -39,6 +39,7 @@ private slots:
 
 private:
     void loadDialogsFromDb();
+    void exportDialogByRow(int row);
 
     DialogListWidget *m_dialogList = nullptr;
     ChatWidget *m_chat = nullptr;

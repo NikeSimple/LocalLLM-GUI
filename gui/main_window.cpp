@@ -90,52 +90,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_chat, &ChatWidget::toggleLeftPanelRequested, this, &MainWindow::toggleLeftPanel);
     connect(m_chat, &ChatWidget::toggleRightPanelRequested, this, &MainWindow::toggleRightPanel);
 
-    connect(m_chat, &ChatWidget::exportDialogRequested, this, [this](int dialogIndex){
-        Q_UNUSED(dialogIndex);
-        if (!m_dialogRepo || !m_messageRepo) return;
-
-        QString path = QFileDialog::getSaveFileName(
-            this, "Экспортировать диалог",
-            QString("dialog-%1.json")
-                .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd-HHmm")),
-            "JSON файлы (*.json)");
-        if (path.isEmpty()) return;
-
-        int row = m_dialogList->currentRow();
-        if (!m_dialogIndexToDbId.contains(row)) return;
-        int dbId = m_dialogIndexToDbId[row];
-
-        DialogInfo info = m_dialogRepo->getById(dbId);
-
-        QJsonObject root;
-        root["title"] = info.title;
-        root["created_at"] = info.createdAt;
-        root["updated_at"] = info.updatedAt;
-        root["model_name"] = info.modelName;
-
-        QJsonArray messagesArray;
-        for (const MessageInfo &m : m_messageRepo->listByDialog(dbId)) {
-            QJsonObject msgObj;
-            msgObj["role"] = m.role;
-            msgObj["content"] = m.content;
-            msgObj["created_at"] = m.createdAt;
-            messagesArray.append(msgObj);
-        }
-        root["messages"] = messagesArray;
-
-        QFile file(path);
-        if (!file.open(QFile::WriteOnly | QFile::Text)) {
-            QMessageBox::warning(this, "Ошибка",
-                QString("Не удалось создать файл: %1").arg(path));
-            return;
-        }
-        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
-        file.close();
-
-        QMessageBox::information(this, "Готово",
-            QString("Диалог экспортирован в %1").arg(path));
-    });
-
     // === Связи DialogListWidget ===
     connect(m_dialogList, &DialogListWidget::themeToggleRequested,
             this, [](){ ThemeManager::instance().toggle(); });
@@ -152,6 +106,54 @@ MainWindow::MainWindow(QWidget *parent)
                                          m_settings->currentModel());
         m_dialogIndexToDbId[row] = dbId;
         m_chat->setCurrentDialog(row);
+    });
+
+    // === Удаление диалога из контекстного меню ===
+    connect(m_dialogList, &DialogListWidget::deleteDialogRequested,
+            this, [this](int row){
+        if (!m_dialogRepo || !m_dialogIndexToDbId.contains(row)) return;
+
+        auto reply = QMessageBox::question(
+            this, "Удаление диалога",
+            "Удалить этот диалог? Сообщения будут удалены безвозвратно.",
+            QMessageBox::Yes | QMessageBox::No);
+
+        if (reply != QMessageBox::Yes) return;
+
+        int dbId = m_dialogIndexToDbId[row];
+
+        m_dialogRepo->remove(dbId);
+        m_dialogIndexToDbId.remove(row);
+
+        m_dialogList->removeDialogRow(row);
+
+        QMap<int, int> newMap;
+        for (auto it = m_dialogIndexToDbId.begin();
+             it != m_dialogIndexToDbId.end(); ++it) {
+            if (it.key() > row) {
+                newMap[it.key() - 1] = it.value();
+            } else {
+                newMap[it.key()] = it.value();
+            }
+        }
+        m_dialogIndexToDbId = newMap;
+
+        if (m_dialogList->currentRow() < 0) {
+            m_chat->clear();
+        }
+
+        statusBar()->showMessage("Диалог удалён");
+    });
+
+    // === Экспорт диалога из контекстного меню ===
+    connect(m_dialogList, &DialogListWidget::exportDialogRequested,
+            this, &MainWindow::exportDialogByRow);
+
+    // === Экспорт из тулбара чата ===
+    connect(m_chat, &ChatWidget::exportDialogRequested, this, [this](int dialogIndex){
+        Q_UNUSED(dialogIndex);
+        int row = m_dialogList->currentRow();
+        exportDialogByRow(row);
     });
 
     // === Связи SettingsOverlay ===
@@ -194,6 +196,50 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() = default;
+
+void MainWindow::exportDialogByRow(int row)
+{
+    if (!m_dialogRepo || !m_messageRepo) return;
+    if (!m_dialogIndexToDbId.contains(row)) return;
+
+    QString path = QFileDialog::getSaveFileName(
+        this, "Экспортировать диалог",
+        QString("dialog-%1.json")
+            .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd-HHmm")),
+        "JSON файлы (*.json)");
+    if (path.isEmpty()) return;
+
+    int dbId = m_dialogIndexToDbId[row];
+    DialogInfo info = m_dialogRepo->getById(dbId);
+
+    QJsonObject root;
+    root["title"] = info.title;
+    root["created_at"] = info.createdAt;
+    root["updated_at"] = info.updatedAt;
+    root["model_name"] = info.modelName;
+
+    QJsonArray messagesArray;
+    for (const MessageInfo &m : m_messageRepo->listByDialog(dbId)) {
+        QJsonObject msgObj;
+        msgObj["role"] = m.role;
+        msgObj["content"] = m.content;
+        msgObj["created_at"] = m.createdAt;
+        messagesArray.append(msgObj);
+    }
+    root["messages"] = messagesArray;
+
+    QFile file(path);
+    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+        QMessageBox::warning(this, "Ошибка",
+            QString("Не удалось создать файл: %1").arg(path));
+        return;
+    }
+    file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    file.close();
+
+    QMessageBox::information(this, "Готово",
+        QString("Диалог экспортирован в %1").arg(path));
+}
 
 void MainWindow::toggleSettingsOverlay()
 {

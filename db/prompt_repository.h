@@ -6,9 +6,6 @@
 #include <QString>
 #include <QSqlDatabase>
 
-/**
- * @brief Описание шаблона промпта (соответствует таблице prompts).
- */
 struct PromptInfo {
     int id = -1;
     QString name;
@@ -16,11 +13,6 @@ struct PromptInfo {
     bool isTemplate = true;
 };
 
-/**
- * @brief Репозиторий для CRUD-операций с таблицей prompts.
- *
- * Реализует требования FR-12 ТЗ — работа с шаблонами промптов.
- */
 class PromptRepository : public QObject
 {
     Q_OBJECT
@@ -33,6 +25,7 @@ public:
     PromptInfo getById(int id);
     bool update(int id, const QString &name, const QString &text);
     bool remove(int id);
+    bool setActive(int id, bool active);
 
 private:
     QSqlDatabase m_db;

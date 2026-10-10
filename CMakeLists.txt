@@ -21,21 +21,15 @@ set(SOURCES
     gui/dialog_list_widget.cpp
     gui/settings_panel.cpp
     gui/settings_overlay.cpp
-    gui/model_selector_widget.cpp
-    gui/connect_dialog.cpp
     gui/toggle_switch.cpp
     gui/theme_manager.cpp
     core/api_client.cpp
-    core/conversation.cpp
     core/file_handler.cpp
-    core/prompt_manager.cpp
-    core/context_builder.cpp
     db/database_manager.cpp
     db/dialog_repository.cpp
     db/message_repository.cpp
     db/prompt_repository.cpp
     config/settings_manager.cpp
-    config/logger.cpp
     resources/resources.qrc
     resources/app.rc
 )

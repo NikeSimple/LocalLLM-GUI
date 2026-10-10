@@ -27,12 +27,15 @@ public:
 
     void setUserName(const QString &name);
     void clearAllDialogs();
+    void removeDialogRow(int row);
 
 signals:
     void newDialogRequested();
     void dialogSelected(int dialogId);
     void settingsRequested();
     void themeToggleRequested();
+    void deleteDialogRequested(int row);
+    void exportDialogRequested(int row);
 
 private slots:
     void onNewDialogClicked();
@@ -46,6 +49,7 @@ private:
     void setupDialogsList(QVBoxLayout *layout);
     void setupProfileFooter(QVBoxLayout *layout);
     void addDialogCard(const QString &title, const QString &preview, const QString &time);
+    int rowFromCardWidget(QWidget *cardWidget) const;
 
     QPushButton *m_newDialogButton = nullptr;
     QLineEdit *m_searchField = nullptr;

@@ -59,6 +59,7 @@ void SettingsOverlay::setPromptRepository(PromptRepository *promptRepo)
 {
     m_promptRepo = promptRepo;
     refreshTemplatesList();
+    collectAndEmitActivePrompts();
 }
 
 QWidget *SettingsOverlay::buildAccountTab()
@@ -213,11 +214,19 @@ QWidget *SettingsOverlay::buildTemplatesTab()
     layout->setContentsMargins(16, 16, 16, 16);
     layout->setSpacing(16);
 
-    // Левая часть — список шаблонов
+    // Левая часть — список шаблонов с чекбоксами
     QVBoxLayout *left = new QVBoxLayout();
     QLabel *listLabel = new QLabel("Сохранённые шаблоны", tab);
     listLabel->setObjectName("settingsLabel");
     left->addWidget(listLabel);
+
+    QLabel *checkHint = new QLabel(
+        "Отметьте галочками шаблоны, которые должны быть активны. "
+        "Их тексты объединятся и попадут в поле «Инструкция для модели».",
+        tab);
+    checkHint->setObjectName("paramHint");
+    checkHint->setWordWrap(true);
+    left->addWidget(checkHint);
 
     m_templatesList = new QListWidget(tab);
     m_templatesList->setObjectName("dialogsList");
@@ -251,20 +260,21 @@ QWidget *SettingsOverlay::buildTemplatesTab()
 
     // Правая часть — применение
     QVBoxLayout *right = new QVBoxLayout();
-    QLabel *applyLabel = new QLabel("Применение шаблона", tab);
+    QLabel *applyLabel = new QLabel("Активные шаблоны", tab);
     applyLabel->setObjectName("settingsLabel");
     right->addWidget(applyLabel);
 
     QLabel *info = new QLabel(
-        "Выберите шаблон слева и нажмите «Применить» — "
-        "его текст подставится в поле «Инструкция для модели» "
-        "в правой панели.",
+        "Активные шаблоны автоматически объединяются и подставляются "
+        "в поле «Инструкция для модели» в правой панели. "
+        "Порядок — сверху вниз по списку.\n\n"
+        "Чтобы отключить все шаблоны — снимите все галочки.",
         tab);
     info->setObjectName("paramHint");
     info->setWordWrap(true);
     right->addWidget(info);
 
-    QPushButton *applyBtn = new QPushButton("Применить шаблон", tab);
+    QPushButton *applyBtn = new QPushButton("Обновить активные", tab);
     applyBtn->setObjectName("primaryButton");
     applyBtn->setMinimumHeight(40);
     connect(applyBtn, &QPushButton::clicked,
@@ -463,9 +473,50 @@ void SettingsOverlay::refreshTemplatesList()
     for (const PromptInfo &p : m_promptRepo->listAll()) {
         QListWidgetItem *item = new QListWidgetItem(p.name);
         item->setData(Qt::UserRole, p.id);
-        item->setToolTip(p.text.left(150));
+        item->setToolTip(p.text.left(200));
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(p.isTemplate ? Qt::Checked : Qt::Unchecked);
         m_templatesList->addItem(item);
     }
+
+    // Обработчик изменения чекбоксов — подключаем один раз
+    static bool connected = false;
+    if (!connected) {
+        connect(m_templatesList, &QListWidget::itemChanged,
+                this, [this](QListWidgetItem *item){
+            if (!item) return;
+            int id = item->data(Qt::UserRole).toInt();
+            bool checked = (item->checkState() == Qt::Checked);
+            onTemplateCheckChanged(id, checked);
+        });
+        connected = true;
+    }
+}
+
+void SettingsOverlay::onTemplateCheckChanged(int id, bool checked)
+{
+    if (!m_promptRepo) return;
+    m_promptRepo->setActive(id, checked);
+    collectAndEmitActivePrompts();
+}
+
+void SettingsOverlay::collectAndEmitActivePrompts()
+{
+    if (!m_promptRepo) return;
+
+    QStringList activeTexts;
+    QVector<PromptInfo> all = m_promptRepo->listAll();
+
+    // listAll возвращает ORDER BY id DESC, значит сверху — самые новые.
+    // Чтобы порядок был «сверху вниз как в списке», обходим в том же порядке.
+    for (const PromptInfo &p : all) {
+        if (p.isTemplate) {
+            activeTexts.append(p.text.trimmed());
+        }
+    }
+
+    QString combined = activeTexts.join("\n\n---\n\n");
+    emit promptApplied(combined);
 }
 
 void SettingsOverlay::onCreateTemplateClicked()
@@ -481,11 +532,13 @@ void SettingsOverlay::onCreateTemplateClicked()
     if (!ok || name.trimmed().isEmpty()) return;
 
     QString text = QInputDialog::getMultiLineText(this, "Текст шаблона",
-        "Введите промпт:", "", &ok);
+        "Введите промпт (можно использовать перенос строки Enter):",
+        "", &ok);
     if (!ok || text.trimmed().isEmpty()) return;
 
     m_promptRepo->create(name.trimmed(), text.trimmed());
     refreshTemplatesList();
+    collectAndEmitActivePrompts();
 }
 
 void SettingsOverlay::onEditTemplateClicked()
@@ -507,11 +560,12 @@ void SettingsOverlay::onEditTemplateClicked()
     if (!ok || name.trimmed().isEmpty()) return;
 
     QString text = QInputDialog::getMultiLineText(this, "Текст шаблона",
-        "Промпт:", p.text, &ok);
+        "Промпт (можно использовать перенос строки Enter):", p.text, &ok);
     if (!ok) return;
 
     m_promptRepo->update(id, name.trimmed(), text.trimmed());
     refreshTemplatesList();
+    collectAndEmitActivePrompts();
 }
 
 void SettingsOverlay::onDeleteTemplateClicked()
@@ -531,22 +585,12 @@ void SettingsOverlay::onDeleteTemplateClicked()
 
     m_promptRepo->remove(id);
     refreshTemplatesList();
+    collectAndEmitActivePrompts();
 }
 
 void SettingsOverlay::onApplyTemplateClicked()
 {
-    if (!m_promptRepo || !m_templatesList) return;
-    QListWidgetItem *item = m_templatesList->currentItem();
-    if (!item) {
-        QMessageBox::information(this, "Выбор", "Выберите шаблон");
-        return;
-    }
-
-    int id = item->data(Qt::UserRole).toInt();
-    PromptInfo p = m_promptRepo->getById(id);
-    if (p.id < 0) return;
-
-    emit promptApplied(p.text);
+    collectAndEmitActivePrompts();
     QMessageBox::information(this, "Готово",
-        QString("Шаблон «%1» применён").arg(p.name));
+        "Активные шаблоны применены в поле «Инструкция для модели»");
 }

@@ -13,7 +13,7 @@ int PromptRepository::create(const QString &name, const QString &text)
     QSqlQuery query(m_db);
     query.prepare(
         "INSERT INTO prompts (name, text, is_template) "
-        "VALUES (:name, :text, 1)"
+        "VALUES (:name, :text, 0)"
     );
     query.bindValue(":name", name);
     query.bindValue(":text", text);
@@ -86,6 +86,20 @@ bool PromptRepository::remove(int id)
 
     if (!query.exec()) {
         qWarning() << "PromptRepository::remove error:" << query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool PromptRepository::setActive(int id, bool active)
+{
+    QSqlQuery query(m_db);
+    query.prepare("UPDATE prompts SET is_template = :active WHERE id = :id");
+    query.bindValue(":active", active ? 1 : 0);
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qWarning() << "PromptRepository::setActive error:" << query.lastError().text();
         return false;
     }
     return true;
