@@ -18,6 +18,9 @@ public:
     QSqlDatabase database() const { return m_db; }
     bool createTables();
 
+    // Только для тестов — подсунуть готовую БД
+    void setDatabaseForTests(const QSqlDatabase &db) { m_db = db; }
+
 private:
     QSqlDatabase m_db;
 };
