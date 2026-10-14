@@ -28,3 +28,15 @@ compile_commands.json
 # Временное
 *.log
 *.tmp
+*.bin
+ggml-base.bin
+
+# Сборки
+build-release/
+LocalLLM-GUI-Portable/
+*.zip
+
+# Сгенерированная документация
+docs/doxygen/
+docs/_build/
+docs/venv/

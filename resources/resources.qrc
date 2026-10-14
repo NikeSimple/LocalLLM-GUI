@@ -2,5 +2,17 @@
     <qresource prefix="/">
         <file>style.qss</file>
         <file>style_dark.qss</file>
+        <file>style_red.qss</file>
+        <file>style_ocean.qss</file>
+        <file>icons/menu.svg</file>
+        <file>icons/settings.svg</file>
+        <file>icons/moon.svg</file>
+        <file>icons/copy.svg</file>
+        <file>icons/attach.svg</file>
+        <file>icons/send.svg</file>
+        <file>icons/plus.svg</file>
+        <file>icons/search.svg</file>
+        <file>icons/download.svg</file>
+        <file>icons/app.ico</file>
     </qresource>
 </RCC>
