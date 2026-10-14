@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <QDir>
 #include "theme_manager.h"
+#include "setup_wizard.h"
 #include "../config/settings_manager.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -193,9 +194,45 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar()->showMessage("Проверка подключения к Ollama...");
     m_chat->setStatusText("●  Проверка подключения...", "#a0a2b4");
     m_api->ping();
+
+    // Проверка первого запуска — если Ollama нет, показать мастер
+    QTimer::singleShot(1500, this, &MainWindow::checkFirstRun);
 }
 
 MainWindow::~MainWindow() = default;
+
+void MainWindow::checkFirstRun()
+{
+    // Проверяем, установлена ли Ollama
+    QStringList candidates;
+    QString localAppData = qgetenv("LOCALAPPDATA");
+    if (!localAppData.isEmpty()) {
+        candidates << localAppData + "/Programs/Ollama/ollama.exe";
+        candidates << localAppData + "/Ollama/ollama.exe";
+    }
+    QString programFiles = qgetenv("ProgramFiles");
+    if (!programFiles.isEmpty()) {
+        candidates << programFiles + "/Ollama/ollama.exe";
+    }
+
+    bool found = false;
+    for (const QString &path : candidates) {
+        if (QFile::exists(path)) { found = true; break; }
+    }
+
+    if (!found) {
+        SetupWizard wizard(this);
+        connect(&wizard, &SetupWizard::setupCompleted,
+                this, &MainWindow::onSetupCompleted);
+        wizard.exec();
+    }
+}
+
+void MainWindow::onSetupCompleted()
+{
+    m_api->ping();
+    statusBar()->showMessage("Настройка завершена");
+}
 
 void MainWindow::exportDialogByRow(int row)
 {

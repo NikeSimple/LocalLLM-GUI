@@ -23,6 +23,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void onSetupCompleted();
+
 private slots:
     void onMessageSent(const QString &text);
     void onMessageAdded(int dialogIndex, const QString &role, const QString &text);
@@ -40,6 +43,7 @@ private slots:
 private:
     void loadDialogsFromDb();
     void exportDialogByRow(int row);
+    void checkFirstRun();
 
     DialogListWidget *m_dialogList = nullptr;
     ChatWidget *m_chat = nullptr;
