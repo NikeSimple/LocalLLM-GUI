@@ -21,10 +21,13 @@ set(SOURCES
     gui/dialog_list_widget.cpp
     gui/settings_panel.cpp
     gui/settings_overlay.cpp
+    gui/setup_wizard.cpp
     gui/toggle_switch.cpp
     gui/theme_manager.cpp
     core/api_client.cpp
     core/file_handler.cpp
+    core/ollama_installer.cpp
+    core/model_downloader.cpp
     db/database_manager.cpp
     db/dialog_repository.cpp
     db/message_repository.cpp
@@ -34,7 +37,7 @@ set(SOURCES
     resources/app.rc
 )
 
-add_executable(LocalLLM-GUI ${SOURCES})
+add_executable(LocalLLM-GUI WIN32 ${SOURCES})
 
 target_include_directories(LocalLLM-GUI PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -48,7 +51,25 @@ target_link_libraries(LocalLLM-GUI PRIVATE
 )
 
 enable_testing()
-add_executable(tests tests/test_main.cpp)
+
+set(TEST_SOURCES
+    tests/test_main.cpp
+    db/database_manager.cpp
+    db/dialog_repository.cpp
+    db/message_repository.cpp
+    db/prompt_repository.cpp
+)
+
+add_executable(tests ${TEST_SOURCES})
+
+target_include_directories(tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(tests PRIVATE
+    Qt6::Core
+    Qt6::Sql
+)
 
 find_library(SQLITE3_LIB NAMES sqlite3 PATHS /ucrt64/lib /usr/lib64 /usr/lib)
 if(SQLITE3_LIB)
